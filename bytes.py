@@ -15,16 +15,14 @@ def string_to_binary(string):
     return binary_string
 
 
-def shift_products():
-    matrix = np.arange(1, 17).reshape((4, 4))
-    matrix[1, :] = np.roll(matrix[1, :], -1)  # one to the left
-    matrix[2, :] = np.roll(matrix[2, :], -2)  # two to the left
-    matrix[3, :] = np.roll(matrix[3, :], -3)  # three to the left
-    print(matrix)
-    return matrix
+def shift_rows(state):
+    state[1, :] = np.roll(state[1, :], -1)
+    state[2, :] = np.roll(state[2, :], -2)
+    state[3, :] = np.roll(state[3, :], -3)
+    return state
 
 
-def mix_columns():
+def mix_columns(state):
     mix_columns_matrix = np.array([
         [0x02, 0x03, 0x01, 0x01],
         [0x01, 0x02, 0x03, 0x01],
@@ -32,34 +30,26 @@ def mix_columns():
         [0x03, 0x01, 0x01, 0x02]
     ], dtype=np.uint8)
 
-    matrix = np.array([
-        [0x49, 0x45, 0x7f, 0x77],
-        [0xDB, 0x39, 0x02, 0xde],
-        [0x87, 0x53, 0xd2, 0x96],
-        [0x3B, 0x89, 0xf1, 0x1a]
-    ], dtype=np.uint16)
-
     result = np.zeros((4, 4), dtype=np.uint8)
 
     for row in range(4):
         for col in range(4):
-            product = mix_columns_matrix[row, :] * matrix[:, col]
+            product = mix_columns_matrix[row, :] * state[:, col]
             for i in range(4):
                 if mix_columns_matrix[row][i] == 2:
-                    product[i] = matrix[i][col] << 1
+                    product[i] = state[i][col] << 1
                     if product[i] > 0xFF:
                         product[i] ^= 0x11B
                 elif mix_columns_matrix[row][i] == 3:
-                    a = matrix[i][col] << 1
+                    a = state[i][col] << 1
                     if a > 0xFF:
                         a ^= 0x11B
-                    b = matrix[i][col]
+                    b = state[i][col]
                     product[i] = a ^ b
 
             result[row][col] = product[0] ^ product[1] ^ product[2] ^ product[3]
 
-    np.set_printoptions(formatter={'int': hex})
-    print(result)
+    return result
 
 
 def binary_to_string(binary):
@@ -90,11 +80,18 @@ if __name__ == "__main__":
         [0x9c, 0x9f, 0x5b, 0x6a],
         [0x7f, 0x35, 0xea, 0x50],
         [0xf2, 0x2b, 0x43, 0x49]
-    ], dtype=np.uint8)
+    ], dtype=np.uint16)
     
 
     state = sub_bytes(state)
+    print('SubBytes:')
+    print(state)
+    state = shift_rows(state)
+    print('ShiftRows:')
+    print(state)
     state = mix_columns(state)
+    print('MixColumns:')
+    print(state)
 
     '''
     a = string_to_binary('abcdef')

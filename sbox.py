@@ -27,5 +27,3 @@ def sub_bytes(state):
         for j in range(4):
             state[i, j] = s_box[state[i, j]]
     return state
-
-sub_bytes()
