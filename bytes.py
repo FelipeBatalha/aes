@@ -1,6 +1,7 @@
 # echo -n "abcdef" | openssl enc -e -a -aes-256-cbc -pass pass:YourPassword
 import base64
 import numpy as np
+from sbox import sub_bytes
 
 
 def string_to_binary(string):
@@ -13,10 +14,8 @@ def string_to_binary(string):
     print(binary_string)
     return binary_string
 
-# correct
 
-
-def shift_rows():
+def shift_products():
     matrix = np.arange(1, 17).reshape((4, 4))
     matrix[1, :] = np.roll(matrix[1, :], -1)  # one to the left
     matrix[2, :] = np.roll(matrix[2, :], -2)  # two to the left
@@ -34,29 +33,30 @@ def mix_columns():
     ], dtype=np.uint8)
 
     matrix = np.array([
-        [0x49, 0x45, 0x7f, 0xC3],
-        [0xDB, 0x39, 0x02, 0xC9],
-        [0x87, 0x53, 0xd2, 0x6E],
-        [0x3B, 0x89, 0xf1, 0xFF]
+        [0x49, 0x45, 0x7f, 0x77],
+        [0xDB, 0x39, 0x02, 0xde],
+        [0x87, 0x53, 0xd2, 0x96],
+        [0x3B, 0x89, 0xf1, 0x1a]
     ], dtype=np.uint16)
 
-    row = mix_columns_matrix[2, :] * matrix[:, 2]
-    x = None
-    for i in range(4):
-        if mix_columns_matrix[2][i] == 2:
-            row[i] = matrix[i][2] << 1
-            if row[i] > 0xFF:
-                row[i] ^= 0x11B
-        elif mix_columns_matrix[2][i] == 3:
-            a = matrix[i][2] << 1
-            if a > 0xFF:
-                a ^= 0x11B
-            b = matrix[i][2]
-            row[i] = a ^ b
-
-    print(hex(row[0] ^ row[1] ^ row[2] ^ row[3]))
-
     result = np.zeros((4, 4), dtype=np.uint8)
+
+    for row in range(4):
+        for col in range(4):
+            product = mix_columns_matrix[row, :] * matrix[:, col]
+            for i in range(4):
+                if mix_columns_matrix[row][i] == 2:
+                    product[i] = matrix[i][col] << 1
+                    if product[i] > 0xFF:
+                        product[i] ^= 0x11B
+                elif mix_columns_matrix[row][i] == 3:
+                    a = matrix[i][col] << 1
+                    if a > 0xFF:
+                        a ^= 0x11B
+                    b = matrix[i][col]
+                    product[i] = a ^ b
+
+            result[row][col] = product[0] ^ product[1] ^ product[2] ^ product[3]
 
     np.set_printoptions(formatter={'int': hex})
     print(result)
@@ -82,7 +82,19 @@ def xor(binary1, binary2):
 
 
 if __name__ == "__main__":
-    mix_columns()
+
+    np.set_printoptions(formatter={'int': hex})
+    
+    state = np.array([
+        [0xa4, 0x68, 0x6b, 0x02],
+        [0x9c, 0x9f, 0x5b, 0x6a],
+        [0x7f, 0x35, 0xea, 0x50],
+        [0xf2, 0x2b, 0x43, 0x49]
+    ], dtype=np.uint8)
+    
+
+    state = sub_bytes(state)
+    state = mix_columns(state)
 
     '''
     a = string_to_binary('abcdef')
