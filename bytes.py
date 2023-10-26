@@ -1,7 +1,7 @@
-# echo -n "abcdef" | openssl enc -e -a -aes-256-cbc -pass pass:YourPassword
 import base64
 import numpy as np
 from sbox import sub_bytes
+from expansion import key_expansion
 
 
 def string_to_binary(string):
@@ -14,13 +14,15 @@ def string_to_binary(string):
     print(binary_string)
     return binary_string
 
+def add_round_key(state, key):
+    return state ^ key
+
 
 def shift_rows(state):
     state[1, :] = np.roll(state[1, :], -1)
     state[2, :] = np.roll(state[2, :], -2)
     state[3, :] = np.roll(state[3, :], -3)
     return state
-
 
 def mix_columns(state):
     mix_columns_matrix = np.array([
@@ -82,16 +84,34 @@ if __name__ == "__main__":
         [0xf2, 0x2b, 0x43, 0x49]
     ], dtype=np.uint16)
     
+    key = np.array([
+        [0x28, 0x28, 0xab, 0x09],
+        [0x7e, 0xae, 0xf7, 0xcf],
+        [0x15, 0xd2, 0x15, 0x4f],
+        [0x16, 0xa6, 0x88, 0x3c]
+    ], dtype=np.uint8)
 
-    state = sub_bytes(state)
-    print('SubBytes:')
-    print(state)
-    state = shift_rows(state)
-    print('ShiftRows:')
-    print(state)
-    state = mix_columns(state)
-    print('MixColumns:')
-    print(state)
+    rounds = 10
+    print('Key Expansion:')
+    keys = key_expansion(key, rounds)
+
+    state = add_round_key(state,key)
+
+    for round in range(rounds):
+        print(f"Round {round}")
+        state = sub_bytes(state)
+        print('SubBytes:')
+        print(state)
+        state = shift_rows(state)
+        print('ShiftRows:')
+        print(state)
+        if round < rounds - 1:
+            print('MixColumns:')
+            state = mix_columns(state)
+            print(state)
+        state = add_round_key(state,key)
+        
+        
 
     '''
     a = string_to_binary('abcdef')

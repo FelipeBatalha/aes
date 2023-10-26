@@ -22,8 +22,11 @@ def sub_bytes(state):
     ]
 
     s_box = np.array(s_box)
-
-    for i in range(4):
-        for j in range(4):
-            state[i, j] = s_box[state[i, j]]
+    #originally range(4), trying this to generalize for rot word
+    for i in range(state.shape[0]):
+        try:
+            for j in range(state.shape[1]):
+                state[i, j] = s_box[state[i, j]]
+        except IndexError:
+            state[i] = s_box[state[i]]
     return state
