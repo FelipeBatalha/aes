@@ -2,21 +2,33 @@ import base64
 import numpy as np
 from sbox import sub_bytes
 from expansion import key_expansion
-
+import sys
 
 def string_to_binary(string):
     binary_string = ''
     binary_bytes = bytes(string, 'utf-8')
+    
     for byte in binary_bytes:
-        binary = bin(byte)[2:]  # indice ignora o 0b no inicio
+        binary = hex(byte)[2:]  # indice ignora o 0b no inicio
         # faz um pad na esquerda se precisar para garantir 8 bits
         binary_string += binary.zfill(8)
-    print(binary_string)
+    print(sys.getsizeof(binary_string))
+    print(string)
+    print(sys.getsizeof(binary_string))
     return binary_string
 
 def add_round_key(state, key):
     return state ^ key
 
+def string_to_hex(string):
+    array = np.zeros(16, dtype=np.uint8)
+    binary_bytes = bytes(string, 'utf-8')
+    i = 0
+    for byte in binary_bytes:
+        array[i] = byte
+        i += 1
+    array = np.reshape(array,(4,4))
+    return array
 
 def shift_rows(state):
     state[1, :] = np.roll(state[1, :], -1)
@@ -77,7 +89,7 @@ if __name__ == "__main__":
 
     np.set_printoptions(formatter={'int': hex})
     
-    state = np.array([
+    '''state = np.array([
         [0xa4, 0x68, 0x6b, 0x02],
         [0x9c, 0x9f, 0x5b, 0x6a],
         [0x7f, 0x35, 0xea, 0x50],
@@ -89,15 +101,41 @@ if __name__ == "__main__":
         [0x7e, 0xae, 0xf7, 0xcf],
         [0x15, 0xd2, 0x15, 0x4f],
         [0x16, 0xa6, 0x88, 0x3c]
+    ], dtype=np.uint8)'''
+
+    '''state = input("Type a fucking string brother: ")
+    key = input("Type a fucking key brother: ")'''
+
+    state = "Thats my Kung Fu"
+    key = "Two One Nine Two"
+
+    state = string_to_hex(state)
+    state = np.array([
+        [0x32, 0x88, 0x31, 0xe0],
+        [0x43, 0x5a, 0x31, 0x37],
+        [0xf6, 0x30, 0x98, 0x07],
+        [0xa8, 0x8d, 0xa2, 0x34]
+    ], dtype=np.uint16)
+    print(f'Message:\n {state}')
+    key = string_to_hex(key)
+    key = np.array([
+        [0x2b, 0x28, 0xab, 0x09],
+        [0x7e, 0xae, 0xf7, 0xcf],
+        [0x15, 0xd2, 0x15, 0x4f],
+        [0x16, 0xa6, 0x88, 0x3c]
     ], dtype=np.uint8)
+    print(f'Key:\n {key}')
+
 
     rounds = 10
     print('Key Expansion:')
     keys = key_expansion(key, rounds)
 
     state = add_round_key(state,key)
+    print('AddRoundKey:')
+    print(state)
 
-    for round in range(rounds):
+    for round in range(1,rounds):
         print(f"Round {round}")
         state = sub_bytes(state)
         print('SubBytes:')
@@ -109,12 +147,12 @@ if __name__ == "__main__":
             print('MixColumns:')
             state = mix_columns(state)
             print(state)
-        state = add_round_key(state,key)
-        
-        
+        state = add_round_key(state,keys[round])
+        print('AddRoundKey:')
+        print(state)
 
     '''
-    a = string_to_binary('abcdef')
+    
     b = string_to_binary('dsfsdf')
     xored = xor(a,b)
     binary_to_string(xored)

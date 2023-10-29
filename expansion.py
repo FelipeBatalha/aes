@@ -8,7 +8,6 @@ def key_expansion(key, rounds):
     for i in range(0,rounds + 1):
         key,rcon = expand_round(key,i,rcon)
         collection.append(key)
-        print(f"Chave{i}:\n {collection[i]}")
         #according to 14:37, 14:54, 15:07 its correct
     return collection
 
@@ -21,9 +20,11 @@ def expand_round(key,current_round,rcon):
     if current_round == 0:
         rcon[0] = 0x01
     else:
-        rcon[0] = 2 * rcon[0]
         if rcon[0] >= 0x80:
-            rcon[0] ^= 0x11b
+            print(2 * rcon[0])
+            rcon[0] = (2 * rcon[0]) ^ 0x11b
+        else:
+            rcon[0] = 2 * rcon[0]
 
     # XOR the key with rcon
     expanded_key[:, 0] = rcon ^ sub_word
