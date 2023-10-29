@@ -21,7 +21,6 @@ def expand_round(key,current_round,rcon):
         rcon[0] = 0x01
     else:
         if rcon[0] >= 0x80:
-            print(2 * rcon[0])
             rcon[0] = (2 * rcon[0]) ^ 0x11b
         else:
             rcon[0] = 2 * rcon[0]

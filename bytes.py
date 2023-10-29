@@ -42,7 +42,7 @@ def mix_columns(state):
         [0x01, 0x02, 0x03, 0x01],
         [0x01, 0x01, 0x02, 0x03],
         [0x03, 0x01, 0x01, 0x02]
-    ], dtype=np.uint8)
+    ], dtype=np.uint16)
 
     result = np.zeros((4, 4), dtype=np.uint8)
 
@@ -63,7 +63,7 @@ def mix_columns(state):
 
             result[row][col] = product[0] ^ product[1] ^ product[2] ^ product[3]
 
-    return result
+    return result.astype(np.uint8)
 
 
 def binary_to_string(binary):
@@ -90,14 +90,14 @@ if __name__ == "__main__":
     np.set_printoptions(formatter={'int': hex})
     
     '''state = np.array([
-        [0xa4, 0x68, 0x6b, 0x02],
-        [0x9c, 0x9f, 0x5b, 0x6a],
-        [0x7f, 0x35, 0xea, 0x50],
-        [0xf2, 0x2b, 0x43, 0x49]
+        [0x32, 0x88, 0x31, 0xe0],
+        [0x43, 0x5a, 0x31, 0x37],
+        [0xf6, 0x30, 0x98, 0x07],
+        [0xa8, 0x8d, 0xa2, 0x34]
     ], dtype=np.uint16)
     
     key = np.array([
-        [0x28, 0x28, 0xab, 0x09],
+        [0x2b, 0x28, 0xab, 0x09],
         [0x7e, 0xae, 0xf7, 0xcf],
         [0x15, 0xd2, 0x15, 0x4f],
         [0x16, 0xa6, 0x88, 0x3c]
@@ -110,24 +110,14 @@ if __name__ == "__main__":
     key = "Two One Nine Two"
 
     state = string_to_hex(state)
-    state = np.array([
-        [0x32, 0x88, 0x31, 0xe0],
-        [0x43, 0x5a, 0x31, 0x37],
-        [0xf6, 0x30, 0x98, 0x07],
-        [0xa8, 0x8d, 0xa2, 0x34]
-    ], dtype=np.uint16)
+    
     print(f'Message:\n {state}')
     key = string_to_hex(key)
-    key = np.array([
-        [0x2b, 0x28, 0xab, 0x09],
-        [0x7e, 0xae, 0xf7, 0xcf],
-        [0x15, 0xd2, 0x15, 0x4f],
-        [0x16, 0xa6, 0x88, 0x3c]
-    ], dtype=np.uint8)
+    
     print(f'Key:\n {key}')
 
 
-    rounds = 10
+    rounds = 11
     print('Key Expansion:')
     keys = key_expansion(key, rounds)
 
@@ -138,18 +128,19 @@ if __name__ == "__main__":
     for round in range(1,rounds):
         print(f"Round {round}")
         state = sub_bytes(state)
-        print('SubBytes:')
-        print(state)
+        #print('SubBytes:')
+        #print(state)
         state = shift_rows(state)
-        print('ShiftRows:')
-        print(state)
+        #print('ShiftRows:')
+        #print(state)
         if round < rounds - 1:
             print('MixColumns:')
             state = mix_columns(state)
             print(state)
         state = add_round_key(state,keys[round])
         print('AddRoundKey:')
-        print(state)
+    
+    print(state)
 
     '''
     
