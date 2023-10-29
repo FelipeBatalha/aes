@@ -2,20 +2,6 @@ import base64
 import numpy as np
 from sbox import sub_bytes
 from expansion import key_expansion
-import sys
-
-def string_to_binary(string):
-    binary_string = ''
-    binary_bytes = bytes(string, 'utf-8')
-    
-    for byte in binary_bytes:
-        binary = hex(byte)[2:]  # indice ignora o 0b no inicio
-        # faz um pad na esquerda se precisar para garantir 8 bits
-        binary_string += binary.zfill(8)
-    print(sys.getsizeof(binary_string))
-    print(string)
-    print(sys.getsizeof(binary_string))
-    return binary_string
 
 def add_round_key(state, key):
     return state ^ key
@@ -66,12 +52,15 @@ def mix_columns(state):
     return result.astype(np.uint8)
 
 
-def binary_to_string(binary):
+def hex_to_string(hexadecimal):
     string = ''
-    for byte in range(0, len(binary) - 1, 8):  # indice ignora o 0b no inicio
-        x = binary[byte:byte+8]
-        string += chr(int(x, 2))
+    hexadecimal = hexadecimal.flatten()
+    for byte in hexadecimal:
+        string += str(hex(byte)[2:].zfill(2))
+    #gota change the format later
     print(string)
+    string = bytes.fromhex(string)
+    string = base64.b64encode(string).decode('utf-8')
     return string
 
 
@@ -85,39 +74,19 @@ def xor(binary1, binary2):
     return xored
 
 
-if __name__ == "__main__":
+def aes_encryption(rounds, state, key):
+
 
     np.set_printoptions(formatter={'int': hex})
-    
-    '''state = np.array([
-        [0x32, 0x88, 0x31, 0xe0],
-        [0x43, 0x5a, 0x31, 0x37],
-        [0xf6, 0x30, 0x98, 0x07],
-        [0xa8, 0x8d, 0xa2, 0x34]
-    ], dtype=np.uint16)
-    
-    key = np.array([
-        [0x2b, 0x28, 0xab, 0x09],
-        [0x7e, 0xae, 0xf7, 0xcf],
-        [0x15, 0xd2, 0x15, 0x4f],
-        [0x16, 0xa6, 0x88, 0x3c]
-    ], dtype=np.uint8)'''
 
-    '''state = input("Type a fucking string brother: ")
-    key = input("Type a fucking key brother: ")'''
-
-    state = "Thats my Kung Fu"
-    key = "Two One Nine Two"
-
-    state = string_to_hex(state)
-    
+    #state = string_to_hex(state)
+    #print(hex_to_string(state))
     print(f'Message:\n {state}')
-    key = string_to_hex(key)
-    
+
+    #key = string_to_hex(key)
+    #print(hex_to_string(key))
     print(f'Key:\n {key}')
 
-
-    rounds = 11
     print('Key Expansion:')
     keys = key_expansion(key, rounds)
 
@@ -125,7 +94,7 @@ if __name__ == "__main__":
     print('AddRoundKey:')
     print(state)
 
-    for round in range(1,rounds):
+    for round in range(1,rounds+1):
         print(f"Round {round}")
         state = sub_bytes(state)
         #print('SubBytes:')
@@ -133,22 +102,48 @@ if __name__ == "__main__":
         state = shift_rows(state)
         #print('ShiftRows:')
         #print(state)
-        if round < rounds - 1:
+        if round < rounds:
             print('MixColumns:')
             state = mix_columns(state)
             print(state)
         state = add_round_key(state,keys[round])
         print('AddRoundKey:')
-    
     print(state)
+    print(f'Result : {hex_to_string(state)}')
 
-    '''
+
+if __name__ == "__main__":
+  
+
+    key = np.array([
+        [0x2b, 0x28, 0xab, 0x09],
+        [0x7e, 0xae, 0xf7, 0xcf],
+        [0x15, 0xd2, 0x15, 0x4f],
+        [0x16, 0xa6, 0x88, 0x3c]
+    ], dtype=np.uint8)
+
+    state = np.array([
+        [0x32, 0x88, 0x31, 0xe0],
+        [0x43, 0x5a, 0x31, 0x37],
+        [0xf6, 0x30, 0x98, 0x07],
+        [0xa8, 0x8d, 0xa2, 0x34]
+    ], dtype=np.uint16)
+
+    '''state = np.array([
+        [0x6b, 0xc1, 0xbe, 0xe2],
+        [0x2e, 0x40, 0x9f, 0x96],
+        [0xe9, 0x3d, 0x7e, 0x11],
+        [0x73, 0x93, 0x17, 0x2a]
+    ], dtype=np.uint16)
+    #6bc1bee22e409f96e93d7e117393172a
+
+    key = np.array([
+            [0x2b, 0x7e, 0x15, 0x16],
+            [0x28, 0xae, 0xd2, 0xa6],
+            [0xab, 0xf7, 0x15, 0x88],
+            [0x09, 0xcf, 0x4f, 0x3c]
+        ], dtype=np.uint16)
+    #2b7e151628aed2a6abf7158809cf4f3c'''
     
-    b = string_to_binary('dsfsdf')
-    xored = xor(a,b)
-    binary_to_string(xored)
-
-
-    binary_to_string('0101010001101000011001010010000001110001011101010110100101100011011010110010000001100010011100100110111101110111011011100010000001100110011011110111100000100000011010100111010101101101011100000111001100100000011011110111011001100101011100100010000000110001001100110010000001101100011000010111101001111001001000000110010001101111011001110111001100101110')
-    print(base64.b64decode('VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wcyBvdmVyIDEzIGxhenkgZG9ncy4='))
-    '''
+    rounds = 10
+    aes_encryption(rounds, state,key)
