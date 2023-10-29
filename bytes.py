@@ -16,6 +16,18 @@ def string_to_hex(string):
     array = np.reshape(array,(4,4))
     return array
 
+def hex_string_to_array(string):
+    print(len(string))
+    array = np.zeros(16, dtype=np.uint16)
+    j = 0
+    for i in range(1, 32 ,2):
+        array[j] = int(string[i-1:i+1],16)
+        j += 1
+    array = np.reshape(array,(4,4))
+    np.set_printoptions(formatter={'int': hex})
+    print(array)
+    return array
+
 def shift_rows(state):
     state[1, :] = np.roll(state[1, :], -1)
     state[2, :] = np.roll(state[2, :], -2)
@@ -90,6 +102,7 @@ def aes_encryption(rounds, state, key):
     print('Key Expansion:')
     keys = key_expansion(key, rounds)
 
+
     state = add_round_key(state,key)
     print('AddRoundKey:')
     print(state)
@@ -97,19 +110,19 @@ def aes_encryption(rounds, state, key):
     for round in range(1,rounds+1):
         print(f"Round {round}")
         state = sub_bytes(state)
-        #print('SubBytes:')
-        #print(state)
+        print('SubBytes:')
+        print(state)
         state = shift_rows(state)
-        #print('ShiftRows:')
-        #print(state)
+        print('ShiftRows:')
+        print(state)
         if round < rounds:
             print('MixColumns:')
             state = mix_columns(state)
             print(state)
         state = add_round_key(state,keys[round])
         print('AddRoundKey:')
-    print(state)
-    print(f'Result : {hex_to_string(state)}')
+        print(state)
+    print(f'Result : {hex_to_string(state.transpose())}')
 
 
 if __name__ == "__main__":
@@ -120,7 +133,7 @@ if __name__ == "__main__":
         [0x7e, 0xae, 0xf7, 0xcf],
         [0x15, 0xd2, 0x15, 0x4f],
         [0x16, 0xa6, 0x88, 0x3c]
-    ], dtype=np.uint8)
+    ], dtype=np.uint16)
 
     state = np.array([
         [0x32, 0x88, 0x31, 0xe0],
@@ -143,7 +156,16 @@ if __name__ == "__main__":
             [0xab, 0xf7, 0x15, 0x88],
             [0x09, 0xcf, 0x4f, 0x3c]
         ], dtype=np.uint16)
-    #2b7e151628aed2a6abf7158809cf4f3c'''
+    #2b7e151628aed2a6abf7158809cf4f3c
+
+    5468617473206D79204B756E67204675 key
+    54776F204F6E65204E696E652054776F state
+    '''
+
+    np.set_printoptions(formatter={'int': hex})
+
     
+    key = hex_string_to_array('2b7e151628aed2a6abf7158809cf4f3c').transpose()
+    state = hex_string_to_array('ae2d8a571e03ac9c9eb76fac45af8e51').transpose()
     rounds = 10
     aes_encryption(rounds, state,key)
