@@ -160,12 +160,18 @@ if __name__ == "__main__":
 
     5468617473206D79204B756E67204675 key
     54776F204F6E65204E696E652054776F state
+
+    key = hex_string_to_array('2b7e151628aed2a6abf7158809cf4f3c').transpose()
+    state = hex_string_to_array('ae2d8a571e03ac9c9eb76fac45af8e51').transpose()
     '''
 
     np.set_printoptions(formatter={'int': hex})
 
+    key = string_to_hex("Thats my Kung Fu")
+    state = string_to_hex("Two One Nine Two")
+
     
-    key = hex_string_to_array('2b7e151628aed2a6abf7158809cf4f3c').transpose()
-    state = hex_string_to_array('ae2d8a571e03ac9c9eb76fac45af8e51').transpose()
+    key = key.transpose()
+    state = state.transpose()
     rounds = 10
     aes_encryption(rounds, state,key)
