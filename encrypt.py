@@ -8,7 +8,10 @@ def add_round_key(state, key):
 
 def string_to_hex(string):
     array = np.zeros(16, dtype=np.uint8)
-    binary_bytes = bytes(string, 'utf-8')
+    if type(string) != bytes:
+        binary_bytes = bytes(string, 'utf-8')
+    else:
+        binary_bytes = string
     i = 0
     for byte in binary_bytes:
         array[i] = byte
@@ -17,7 +20,7 @@ def string_to_hex(string):
     return array
 
 def hex_string_to_array(string):
-    print(len(string))
+    #print(len(string))
     array = np.zeros(16, dtype=np.uint16)
     j = 0
     for i in range(1, 32 ,2):
@@ -25,7 +28,7 @@ def hex_string_to_array(string):
         j += 1
     array = np.reshape(array,(4,4))
     np.set_printoptions(formatter={'int': hex})
-    print(array)
+    #print(array)
     return array
 
 def shift_rows(state):
@@ -70,9 +73,9 @@ def hex_to_string(hexadecimal):
     for byte in hexadecimal:
         string += str(hex(byte)[2:].zfill(2))
     #gota change the format later
-    print(string)
+    #print(string)
     string = bytes.fromhex(string)
-    string = base64.b64encode(string).decode('utf-8')
+    #string = base64.b64encode(string).decode('utf-8')
     return string
 
 
@@ -82,7 +85,7 @@ def xor(binary1, binary2):
         raise ValueError("Xor between different size strings wont happen")
     for a, b in zip(binary1, binary2):
         xored += str(int(a) ^ int(b))
-    print(xored)
+    #print(xored)
     return xored
 
 
@@ -91,38 +94,35 @@ def aes_encryption(rounds, state, key):
 
     np.set_printoptions(formatter={'int': hex})
 
-    #state = string_to_hex(state)
-    #print(hex_to_string(state))
-    print(f'Message:\n {state}')
+    #print(f'Message:\n {state}')
 
-    #key = string_to_hex(key)
-    #print(hex_to_string(key))
-    print(f'Key:\n {key}')
+    #print(f'Key:\n {key}')
 
-    print('Key Expansion:')
+    #print('Key Expansion:')
     keys = key_expansion(key, rounds)
 
 
     state = add_round_key(state,key)
-    print('AddRoundKey:')
-    print(state)
+    #print('AddRoundKey:')
+    #print(state)
 
     for round in range(1,rounds+1):
-        print(f"Round {round}")
+        #print(f"Round {round}")
         state = sub_bytes(state)
-        print('SubBytes:')
-        print(state)
+        #print('SubBytes:')
+        #print(state)
         state = shift_rows(state)
-        print('ShiftRows:')
-        print(state)
+        #print('ShiftRows:')
+        #print(state)
         if round < rounds:
-            print('MixColumns:')
+            #print('MixColumns:')
             state = mix_columns(state)
-            print(state)
+            #print(state)
         state = add_round_key(state,keys[round])
-        print('AddRoundKey:')
-        print(state)
-    print(f'Result : {hex_to_string(state.transpose())}')
+        #print('AddRoundKey:')
+        #print(state)
+    #print(f'Result : {hex_to_string(state.transpose())}')
+    return hex_to_string(state.transpose())
 
 
 if __name__ == "__main__":

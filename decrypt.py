@@ -75,7 +75,7 @@ def hex_to_string(hexadecimal):
     #gota change the format later
     print(string)
     string = bytes.fromhex(string)
-    string = base64.b64encode(string).decode('utf-8')
+    #string = base64.b64encode(string).decode('utf-8')
     return string
 
 def aes_decryption(rounds, state, key):
@@ -123,6 +123,7 @@ def aes_decryption(rounds, state, key):
     print(state)
 
     print(f'Result : {hex_to_string(state.transpose())}')
+    return hex_to_string(state.transpose())
 
 if __name__ == "__main__":
 

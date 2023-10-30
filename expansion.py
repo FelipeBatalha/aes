@@ -4,26 +4,18 @@ from sbox import sub_bytes
 
 def key_expansion(key, rounds):
     rcon = np.zeros(4, dtype=np.uint8)
-    print(f"Key 0")
-    print(key)
     collection = [key]
     for i in range(0,rounds):
         key,rcon = expand_round(key,i,rcon)
         collection.append(key)
-        print(f"Key {i + 1}")
-        print(key)
-        print(rcon)
         #according to 14:37, 14:54, 15:07 its correct
     return collection
 
 def expand_round(key,current_round,rcon):
     expanded_key = np.zeros((4, 4), dtype=np.uint8)
     rot_word = np.roll(key[:, 3], -1)
-    print('Rot word')
-    print(rot_word)
     np.set_printoptions(formatter={'int': hex})
     sub_word = sub_bytes(rot_word)
-    print(sub_word)
     if current_round == 0:
         rcon[0] = 0x01
     else:
