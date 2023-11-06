@@ -1,4 +1,3 @@
-import base64
 import numpy as np
 from sbox import sub_bytes
 from expansion import key_expansion
@@ -17,7 +16,7 @@ def string_to_hex(string):
         array[i] = byte
         i += 1
     array = np.reshape(array,(4,4))
-    return array
+    return array.transpose()
 
 def hex_string_to_array(string):
     array = np.zeros(16, dtype=np.uint16)
@@ -26,7 +25,7 @@ def hex_string_to_array(string):
         array[j] = int(string[i-1:i+1],16)
         j += 1
     array = np.reshape(array,(4,4))
-    return array
+    return array.transpose()
 
 def shift_rows(state):
     state[1, :] = np.roll(state[1, :], -1)
@@ -88,17 +87,9 @@ def aes_encryption(rounds, state, key):
 
 
 if __name__ == "__main__":
-  
-    '''
-    key = hex_string_to_array('2b7e151628aed2a6abf7158809cf4f3c').transpose()
-    state = hex_string_to_array('ae2d8a571e03ac9c9eb76fac45af8e51').transpose()
-    '''
 
     key = string_to_hex("Thats my Kung Fu")
     state = string_to_hex("Two One Nine Two")
 
-    
-    key = key.transpose()
-    state = state.transpose()
     rounds = 10
     print(f'Cifra: {aes_encryption(rounds, state,key).hex()}')
